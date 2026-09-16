@@ -1,0 +1,72 @@
+import pandas as pd
+
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+data = {
+    'student_name' :['ken','kevin','cabanalan','james','jardin','win','love','punzalan','jayve','lance','harrold','jonh','carl','aguilar','daplas','dominic','castro','esponilla','nicole','jasmine'],
+    'studyhourse_rate' : [1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10],
+    'attendance_rate' : [1,5,6,77,55,44,63,87,99,100,34,56,6,77,88,44,33,67,45,30],
+    'passed' : [0,1,1,0,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,],
+
+}
+
+df = pd.DataFrame(data)
+df['status'] = df['passed'].map({1: 'Passed', 0: 'At Risk'})
+print(df[['student_name','studyhourse_rate','attendance_rate', 'status']])
+```[cite: 2]
+
+---
+
+**Step 2: Train/Test Split**
+
+```python
+from re import X
+x = df[['studyhourse_rate', 'attendance_rate']]
+y = df['passed']
+names = df['student_name']
+
+X_train, X_test, y_train, y_test, names_train, names_test = train_test_split(x, y, names, test_size=0.25, random_state=42)
+print("training Group")
+print(list(names_train))
+
+print("\n Testing Group")
+print(list(names_test))
+```[cite: 2]
+
+---
+
+**Step 3: Train Model (Supervised)**
+
+```python
+model = DecisionTreeClassifier(max_depth=3, random_state=42)
+model.fit(X_train, y_train)
+
+print("model Trained on", len(X_train),"students")
+```[cite: 2]
+
+---
+
+**Step 4: Predict the Testing Group**
+
+```python
+y_pred = model.predict(X_test)
+
+results = pd.DataFrame({
+    'student_name' : names_test.values,
+    'actual' : y_test.map({1: "Passed", 0: "at risks"}).values
+})
+
+print(results)
+```[cite: 2]
+
+---
+
+**Step 5: Grade the Model**
+
+```python
+acc = accuracy_score(y_test, y_pred)
+print("Accuracy", round(acc*100, 2), "x")
+print(classification_report(y_test, y_pred, target_names=['at risk', 'passed']))
+```[cite: 2]
