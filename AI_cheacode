@@ -1,0 +1,243 @@
+messy_data = {
+    'patient_name': ['Dela Cruz', 'Santos', 'Reyes', 'bautista', 'GARCIA ', ' Mendoza', 'Torres', 'Ramos', 'Aquino', 'Fernandez', 'delaCruz', 'Santos', 'Villanueva', 'Domingo', 'Castro', None, 'Reyes', 'Navarro', None, 'Pascual', 'Torres', 'Aquino', 'Bautista', 'Cruz', 'Mercado'],
+    'sex': ['M','F','Male','female','M','F','m','F','M','Female','F','M','F','M','F', 'M','F','M','F','M','F','M','F','M','F'], 
+    'barangay': ['San Roque','Bagumbayan','san roque','Poblacion','Bagumbayan ','San Jose', 'Poblacion','Sto. Nino','San Roque','Bagumbayan','Poblacion','San Jose', 'Sto Nino','San Roque','Bagumbayan','Poblacion','San Roque','San Jose', 'Bagumbayan','Poblacion','Sto. Nino','San Roque','San Jose','Bagumbayan','Poblacion'],
+    'visit_date': ['2026-01-05','01/06/2026','2026-1-7','2026-01-08','08-01-2026','2026-01-09', '2026-01-09','2026/01/10','2026-01-11','01-12-2026','2026-01-13','2026-01-13', '2026-01-14','2026-01-15',None,'2026-01-16','2026-01-17','2026-01-18', '2026-01-19','2026-01-20','2026-01-20','2026-01-21','2026-01-22','2026-01-23','2026-01-24'],
+    'age': [34, 5, 150, 27, np.nan, 62, 41, 8, np.nan, 29, 34, 5, 71, 45, 19, -3, 55, np.nan, 22, 38, 41, np.nan, 60, 34, 47],
+    'weight_kg': ['65kg','18.5','58 kg','70.2','80','45.0kg', '150', '20', '55.5', '62', '65kg', '18.5', '68', '75', np.nan, '-40', '90kg', '52', '30', '77', '68', '58', '95', '65kg', '61'],
+    'height_cm': [165, 110, 170, np.nan, 175, 150, 168, 128, 160, 172, 165, 110, 155, 180, 140, 169, 158, np.nan, 132, 162, 168, 173, 5.9, 165, 159],
+    'bp_systolic': ['120','95','210','130','118','160','122','100','300','125','120','95','140', '135','108','119','150','127','98','131','122','128','145','120','133'],
+    'temperature_c': [36.5, 37.0, 39.8, 36.7, 36.6, 38.2, 36.9, 36.8, 42.5, 36.5, 36.5, 37.0, 37.1, 36.4, 36.9, 36.6, 40.1, 36.7, 36.8, 36.9, 36.5, 37.2, 39.0, 36.5, 36.6],
+    'diagnosis': ['Hypertension','Common Cold','hypertension','Diabetes','COMMON COLD','Flu', 'Hypertension ','Asthma','Diabetes Type 2','common cold','Hypertension','Common Cold', 'Migraine','Flu','UTI','Hypertension','diabetes','Asthma','Common Cold','Flu', 'Hypertension','Diabetes','Migrain','Hypertension','UTI'],
+    'follow_up_needed': ['Yes','No','yes','NO','Y','N','Yes','No','yes','No','Yes','No','No', 'Yes','No','Yes','yes','No','N','Yes','Yes','No','Y','Yes','No'],
+    'senior_citizen': [0,0,1,0,1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0]
+}
+
+df = pd.DataFrame(messy_data)
+
+print("Missing values")
+print(df.isnull().sum())
+Question #2
+Python
+nameless_records = df[df['patient_name'].isnull()]
+print(nameless_records[['barangay', 'age', 'bp_systolic', 'temperature_c', 'diagnosis']])
+Question #3
+Python
+unique_before = df['barangay'].nunique()
+barangay_clean = df['barangay'].astype(str).str.strip().str.title().replace({'Sto Nino': 'Sto. Nino'})
+unique_after = barangay_clean.nunique()
+
+print(f"Unique Barangays Before: {unique_before}")
+print(f"Unique Barangays After: {unique_after}")
+print(f"Standardized List: {barangay_clean.unique()}")
+Question #4
+Python
+df_dates = df.copy()
+df_dates['visit_date_clean'] = pd.to_datetime(df_dates['visit_date'], errors='coerce', format='mixed')
+
+df_dates = df_dates.sort_values('visit_date_clean')
+
+daily_visits = df_dates['visit_date_clean'].value_counts().sort_index()
+
+days_with_multiple_visits = daily_visits[daily_visits > 1]
+max_visits_day = daily_visits[daily_visits == daily_visits.max()]
+
+print("Days with more than 1 visit:")
+print(days_with_multiple_visits)
+print("\nDay(s) with the most visits:")
+print(max_visits_day)
+Question #5
+Python
+duplicate_logs = df[df.duplicated(subset=['age', 'height_cm', 'bp_systolic', 'diagnosis'], keep=False)]
+print("Potential duplicate logs (matching age, height, BP, diagnosis):")
+print(duplicate_logs[['patient_name', 'visit_date', 'age', 'bp_systolic', 'diagnosis']])
+Question #6
+Python
+df_clean = df.copy()
+
+df_clean['patient_name'] = (
+    df_clean['patient_name']
+    .str.strip()
+    .str.title()
+)
+df_clean['sex'] = (
+    df_clean['sex']
+    .str.strip()
+    .str.lower()
+    .map({
+        'm': 'Male',
+        'male': 'Male',
+        'f': 'Female',
+        'female': 'Female'
+   })
+)
+df_clean['barangay'] = (
+    df_clean['barangay']
+    .str.strip()
+    .str.lower()
+    .replace({
+        'san roque': 'San Roque',
+        'bagumbayan': 'Bagumbayan',
+        'poblacion': 'Poblacion',
+        'san jose': 'San Jose',
+        'sto. nino': 'Sto. Nino',
+        'sto nino': 'Sto. Nino'
+    })
+)
+df_clean['visit_date'] = pd.to_datetime(
+    df_clean['visit_date'],
+    errors='coerce'
+)
+df_clean['weight_kg'] = (
+    df_clean['weight_kg']
+    .astype(str)
+    .str.replace('kg', '', case=False)
+    .str.strip()
+)
+df_clean['weight_kg'] = pd.to_numeric(
+    df_clean['weight_kg'],
+    errors='coerce'
+)
+df_clean.loc[
+    (df_clean['age'] < 0) | (df_clean['age'] > 120),
+    'age'
+] = np.nan
+df_clean['follow_up_needed'] = (
+    df_clean['follow_up_needed']
+    .str.strip()
+    .str.lower()
+    .map({
+        'yes': 'Yes',
+        'y': 'Yes',
+        'no': 'No',
+        'n': 'No'
+    })
+)
+df_clean['diagnosis'] = (
+    df_clean['diagnosis']
+    .str.strip()
+    .str.title()
+)
+df_clean['diagnosis'] = df_clean['diagnosis'].replace({
+    'Migrain': 'Migraine'
+})
+print(df_clean)
+
+total_valid_patients = df_clean['patient_name'].notna().sum()
+print("Total valid patients:", total_valid_patients)
+
+average_age = df_clean['age'].mean()
+print("Average age:", round(average_age, 2))
+
+most_common_diagnosis = df_clean['diagnosis'].mode()[0]
+print("Most common diagnosis:", most_common_diagnosis)
+
+follow_up_percentage = (
+    (df_clean['follow_up_needed'] == 'Yes').mean() * 100
+)
+print("Percentage needing follow-up:",
+      round(follow_up_percentage, 2), "%")
+Question #7
+Python
+df['name_clean'] = (
+    df['patient_name']
+    .str.strip()
+    .str.lower()
+)
+
+possible_duplicates = df[
+    df.duplicated(
+        subset=['name_clean', 'age', 'barangay'],
+        keep=False
+    )
+].sort_values(['name_clean', 'age'])
+
+print(
+    possible_duplicates[
+        ['patient_name', 'age', 'barangay', 'visit_date']
+    ]
+)
+Question #8
+Python
+def clean_sex_column(series):
+    normalized = series.astype(str).str.strip().str.upper()
+
+    mapping = {
+        'M': 'Male',
+        'MALE': 'Male',
+        'F': 'Female',
+        'FEMALE': 'Female'
+    }
+    return normalized.map(mapping)
+
+df['sex_clean'] = clean_sex_column(df['sex'])
+print("Cleaned Sex Categories:")
+print(df['sex_clean'].value_counts())
+Question #9
+Python
+df_clean['diagnosis'] = (
+    df_clean['diagnosis']
+    .str.strip()
+    .str.title()
+)
+
+df_clean['diagnosis'] = df_clean['diagnosis'].replace({
+    'Migrain': 'Migraine'
+})
+print(df_clean['diagnosis'].value_counts())
+
+df_clean['diagnosis'] = df_clean['diagnosis'].replace({
+    'Diabetes Type 2': 'Diabetes'
+})
+print(df_clean['diagnosis'].value_counts())
+Question #10
+Python
+f_hazards = df_clean.copy()
+
+invalid_ages = f_hazards[f_hazards['age'] < 0]
+invalid_weights = f_hazards[f_hazards['weight_kg'] < 0]
+extreme_bps = f_hazards[f_hazards['bp_systolic'] >= 200]
+extreme_temps = f_hazards[f_hazards['temperature_c'] >= 41.0]
+
+print("Invalid Negative Ages:", invalid_ages[['patient_name', 'age']])
+print("Invalid Negative Weights:", invalid_weights[['patient_name', 'weight_kg']])
+print("Extreme Systolic BP Outliers:", extreme_bps[['patient_name', 'bp_systolic']])
+print("Extreme Temperature Outliers:", extreme_temps[['patient_name', 'temperature_c']])
+Visualization
+Python
+barangay_counts = df_clean['barangay'].value_counts()
+visit_counts = df_clean['visit_date'].value_counts().sort_index()
+diagnosis_counts = df_clean['diagnosis'].value_counts()
+follow_up_counts = df_clean['follow_up_needed'].value_counts()
+
+plt.figure(figsize=(15, 10))
+
+plt.subplot(2, 2, 1)
+barangay_counts.plot(kind='bar', color='skyblue', edgecolor='black')
+plt.title('Number of Patients by Barangay')
+plt.xlabel('Barangay')
+plt.ylabel('Number of Patients')
+plt.xticks(rotation=45)
+
+plt.subplot(2, 2, 2)
+visit_counts.plot(kind='bar', color='teal', edgecolor='black')
+plt.title('Number of Patient Visits per Date')
+plt.xlabel('Visit Date')
+plt.ylabel('Number of Visits')
+plt.xticks(rotation=45)
+
+plt.subplot(2, 2, 3)
+diagnosis_counts.plot(kind='bar', color='white', edgecolor='black')
+plt.title('Most Common Diagnoses')
+plt.xlabel('Diagnosis')
+plt.ylabel('Number of Patients')
+plt.xticks(rotation=45)
+
+plt.subplot(2, 2, 4)
+plt.bar(follow_up_counts.index, follow_up_counts.values, color=['coral', 'cornflowerblue'], edgecolor='black')
+plt.title('Patients Needing Follow-Up')
+plt.xlabel('Follow-Up Status')
+plt.ylabel('Number of Patients')
+
+plt.tight_layout()
+plt.show()
